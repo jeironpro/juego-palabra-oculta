@@ -32,7 +32,7 @@ header {
 }
 
 header h1 {
-    background: linear-gradient(90deg, #0044ff, #334b99);
+    background: linear-gradient(90deg, #0044ff, #335c99);
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
@@ -80,7 +80,7 @@ footer {
     font-size: 1rem;
     font-weight: 600;
     padding: 15px 25px;
-    position: absolute;
+    position: relative;
     text-align: center;
     top: 12%;
     z-index: 100;

@@ -29,7 +29,7 @@ fetch("json/palabras_ocultas.json")
 for (let i = 0; i < filas; i++) {
     const fila = document.createElement("div");
     fila.classList.add("fila");
-    
+
     for (let j = 0; j < columnas; j++) {
         const input = document.createElement("input");
         input.type = "text";
@@ -39,18 +39,7 @@ for (let i = 0; i < filas; i++) {
         input.dataset.columna = j;
 
         input.disabled = i !== filaActual;
-        
-        input.addEventListener("input", (e) => {
-            e.target.value = e.target.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚüÜ]/g, "").toLowerCase();
-            
-            if (e.target.value && j < columnas - 1) {
-                const siguienteCasilla = fila.children[j + 1];
-                
-                if (siguienteCasilla) {
-                    siguienteCasilla.focus();
-                }
-            }
-        });
+        input.readOnly = true;
         fila.appendChild(input);
     }
     tablero.appendChild(fila);
@@ -59,26 +48,26 @@ document.querySelector(".casilla").focus();
 
 function verificarFila(numeroFila) {
     const fila = document.querySelectorAll(`.fila:nth-child(${numeroFila + 1}) .casilla`);
-    
+
     let palabraIngresada = "";
-    
+
     fila.forEach(casilla => palabraIngresada += casilla.value);
-    
+
     if (palabraIngresada.length !== 5) {
         mostrarMensaje("Completa la palabra", "aviso");
         return;
     }
-    
+
     if (!listaPalabras.includes(palabraIngresada)) {
         mostrarMensaje("Palabra no válida", "error");
         return;
     }
-    
+
     const letrasSecretas = palabraSecreta.split('');
     const letrasIngresadas = palabraIngresada.split('');
-    
+
     const usada = Array(5).fill(false);
-    
+
     for (let i = 0; i < 5; i++) {
         fila[i].classList.remove("verde", "amarillo", "gris");
 
@@ -87,7 +76,7 @@ function verificarFila(numeroFila) {
             usada[i] = true;
         }
     }
-    
+
     for (let i = 0; i < 5; i++) {
         if (fila[i].classList.contains("verde")) {
             continue;
@@ -134,16 +123,49 @@ function verificarFila(numeroFila) {
 }
 
 document.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !juegoTerminado) {
-        verificarFila(filaActual);
+    if (juegoTerminado) return;
 
-        const siguienteFila = document.querySelectorAll(`.fila:nth-child(${filaActual + 1}) .casilla`);
+    const key = e.key.toLowerCase();
 
-        if (siguienteFila.length > 0) {
-            siguienteFila[0].focus();
-        }
+    if (key === "enter") {
+        e.preventDefault();
+        manejarEntrada("enviar");
+    } else if (key === "backspace") {
+        manejarEntrada("eliminar");
+    } else if (/^[a-zñ]$/.test(key)) {
+        manejarEntrada(key);
     }
 });
+
+function manejarEntrada(tecla) {
+    if (juegoTerminado) return;
+
+    const fila = document.querySelectorAll(`.fila:nth-child(${filaActual + 1}) .casilla`);
+
+    if (tecla === "eliminar") {
+        for (let i = columnas - 1; i >= 0; i--) {
+            if (fila[i].value !== "") {
+                fila[i].value = "";
+                fila[i].focus();
+                break;
+            }
+        }
+    } else if (tecla === "enviar") {
+        verificarFila(filaActual);
+    } else {
+        for (let i = 0; i < columnas; i++) {
+            if (fila[i].value === "" && !fila[i].disabled) {
+                fila[i].value = tecla;
+                fila[i].focus();
+
+                if (i < columnas - 1) {
+                    fila[i + 1].focus();
+                }
+                break;
+            }
+        }
+    }
+}
 
 function mostrarMensaje(texto, tipo = "") {
     mensaje.style.display = "block";
@@ -174,7 +196,7 @@ teclas.forEach(fila => {
     fila.forEach(letra => {
         const boton = document.createElement("button");
         boton.classList.add("tecla");
-        
+
         if (letra === "eliminar") {
             boton.classList.add("eliminar");
             boton.innerHTML = `<span class="material-symbols-outlined">backspace</span>`;
@@ -187,7 +209,7 @@ teclas.forEach(fila => {
         boton.setAttribute("data-tecla", letra);
         filaTeclado.appendChild(boton);
     });
-    
+
     contenedorTeclado.appendChild(filaTeclado);
 });
 
@@ -196,28 +218,5 @@ contenedorTeclado.addEventListener("click", (e) => {
     if (!boton) return;
 
     const tecla = boton.getAttribute("data-tecla");
-    const fila = document.querySelectorAll(`.fila:nth-child(${filaActual + 1}) .casilla`);
-
-    if (tecla === "eliminar") {
-        for (let i = columnas - 1; i >= 0; i--) {
-            if (fila[i].value !== "") {
-                fila[i].value = "";
-                fila[i].focus();
-                break;
-            }
-        }
-    } else if (tecla === "enviar") {
-        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
-    } else {
-        for (let i = 0; i < columnas; i++) {
-            if (fila[i].value === "" && !fila[i].disabled) {
-                fila[i].value = tecla;
-
-                if (i < columnas - 1) {
-                    fila[i + 1].focus();
-                }
-                break;
-            }
-        }
-    }
+    manejarEntrada(tecla);
 });
