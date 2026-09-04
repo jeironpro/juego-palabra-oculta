@@ -1,8 +1,7 @@
 # juego-palabra-oculta
 
-## 📌 Descripción
-Este proyecto fue creado por mí inicialmente y quedó a medias por cuestiones de tiempo. Fue terminado probando el nuevo editor de Google, Antigravity, y usando los cinco modelos de IA disponibles.
+Juego estilo Wordle en el que hay que adivinar la palabra oculta de cinco letras en un máximo de seis intentos.
 
-## 📜 Licencia
+## Licencia
 Este proyecto está bajo la licencia **MIT**.  
 Consulta el archivo [LICENSE](LICENSE) para más detalles.
